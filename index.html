@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brick Order and Payment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-image: url('https://example.com/background.jpg'); /* Replace with your background image URL */
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+        }
+
+        .section {
+            width: 80%;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        #available-bricks {
+            background-color: rgba(0, 128, 255, 0.7); /* Light blue background */
+        }
+
+        #order-tracking {
+            background-color: rgba(255, 165, 0, 0.7); /* Light orange background */
+        }
+
+        #help-support {
+            background-color: rgba(0, 255, 128, 0.7); /* Light green background */
+        }
+
+        h1, h2 {
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        input[type="text"], input[type="number"], input[type="email"], input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        input[type="button"], input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745; /* Green button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        input[type="button"]:hover, input[type="submit"]:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+
+        .payment-form {
+            display: none; /* Initially hidden */
+            width: 400px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background-color: #fff;
+            color: #333;
+        }
+
+        #qrCode {
+            display: none; /* Initially hidden */
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #timer {
+            background-color: rgba(255, 255, 255, 0.8); /* White background for better visibility */
+            color: #333; /* Dark text color */
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #paymentStatus {
+            display: none; /* Initially hidden */
+            margin-top: 20px;
+        }
+
+        /* Help and Support Section */
+        .help-support {
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.9); /* Light background for help section */
+            color: #333; /* Dark text color */
+            text-align: left;
+        }
+
+        .help-support h2 {
+            color: #000; /* Dark color for the heading */
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Bricks Website</h1>
+
+    <div class="section" id="available-bricks">
+        <h2>Available Bricks</h2>
+        <table>
+            <tr>
+                <th>Brick Size</th>
+                <th>Quantity</th>
+                <th>Price per Brick</th>
+                <th>Total Price</th>
+            </tr>
+            <tr>
+                <td>Standard (10x5x3)</td>
+                <td><input type="number" id="qty1" value="0" min="0" onchange="calculateTotal(1)"></td>
+                <td>$1.00</td>
+                <td id="total1">$0.00</td>
+            </tr>
+            <tr>
+                <td>Large (12x6x4)</td>
+                <td><input type="number" id="qty2" value="0" min="0" onchange="calculateTotal(2)"></td>
+                <td>$1.50</td>
+                <td id="total2">$0.00</td>
+            </tr>
+            <tr>
+                <td>Extra Large (15x7x5)</td>
+                <td><input type="number" id="qty3" value="0" min="0" onchange="calculateTotal(3)"></td>
+                <td>$2.00</td>
+                <td id="total3">$0.00</td>
+            </tr>
+        </table>
+        <input type="button" value="Proceed to Payment" onclick="showPaymentForm(1)">
+    </div>
+
+    <div class="section" id="order-tracking">
+        <h2>Order Tracking</h2>
+        <form id="orderForm" onsubmit="return showPaymentForm(2)">
+            <label for="brickSize">Brick Size:</label>
+            <input type="text" id="brickSize" placeholder="Enter brick size required" required>
+            
+            <label for="orderQty">Number of Bricks:</label>
+            <input type="number" id="orderQty" min="1" required>
+            
+            <label for="deliveryTime">Estimated Delivery Time:</label>
+            <input type="text" id="deliveryTime" placeholder="e.g., 3 days" required>
+            
+            <label for="currentPrice">Current Price:</label>
+            <input type="text" id="currentPrice" placeholder="Current price for the product" required>
+            
+            <input type="submit" value="Submit Order">
+        </form>
+    </div>
+
+    <div class="payment-form" id="paymentForm">
+        <h2>Payment Details</h2>
+        <form onsubmit="handlePayment(event)">
+            <label for="upiId">UPI ID:</label>
+            <input type="text" id="upiId" value="9347107401@ybl" readonly>
+
+            <label for="amount">Total Amount:</label>
+            <input type="text" id="amount" readonly>
+
+            <input type="submit" value="Generate QR Code">
+        </form>
+    </div>
+
+    <div id="qrCode">
+        <h2>Scan to Pay</h2>
+        <img id="qrImage" src="" alt="QR Code">
+        <p id="timer"></p>
+    </div>
+
+    <div id="paymentStatus">
+        <h2>Payment Status</h2>
+        <p id="statusMessage"></p>
+    </div>
+
+    <!-- Help & Support Section -->
+    <div class="section help-support" id="help-support">
+        <h2>Help & Support</h2>
+        <p><strong>Email:</strong> support@bricksproduction.com</p>
+        <p><strong>Phone Number:</strong> +1 234 567 8901</p>
+        <p><strong>Location:</strong> 123 Brick Lane, Bricktown, BR 12345</p>
+        <p><strong>Company:</strong> Bricks Production</p>
+    </div>
+
+    <script>
+        let totalAmount = 0; // Global variable to store the total amount
+        let paymentTimeout; // Variable to store the timeout
+
+        function calculateTotal(row) {
+            const qty = document.getElementById(`qty${row}`).value;
+            const pricePerBrick = row === 1 ? 1.00 : row === 2 ? 1.50 : 2.00;
+            const total = qty * pricePerBrick;
+            document.getElementById(`total${row}`).innerText = `$${total.toFixed(2)}`;
+        }
+
+        function showPaymentForm(section) {
+            totalAmount = 0; // Reset total amount
+
+            if (section === 1) {
+                // Calculate total from Section 1
+                for (let i = 1; i <= 3; i++) {
+                    const qty = document.getElementById(`qty${i}`).value;
+                    const pricePerBrick = i === 1 ? 1.00 : i === 2 ? 1.50 : 2.00;
+                    totalAmount += qty * pricePerBrick;
+                }
+            } else {
+                // Get values from Section 2
+                const orderQty = document.getElementById('orderQty').value;
+                const currentPrice = document.getElementById('currentPrice').value;
+                totalAmount = orderQty * currentPrice; // Assuming currentPrice is the price per brick
+            }
+
+            if (totalAmount > 0) {
+                document.getElementById('amount').value = totalAmount.toFixed(2); // Set total amount in payment form
+                document.getElementById('paymentForm').style.display = 'block'; // Show payment form
+            } else {
+                alert('Please enter a valid quantity.');
+            }
+
+            return false; // Prevent form submission
+        }
+
+        function handlePayment(event) {
+            event.preventDefault(); // Prevent form submission
+
+            // Generate UPI payment link
+            const paymentLink = `upi://pay?pa=9347107401@ybl&pn=BricksProduction&mc=1234&tid=txn123&am=${totalAmount}&cu=INR&url=https://yourwebsite.com`;
+
+            // Generate QR Code
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(paymentLink)}&size=300x300`;
+            document.getElementById('qrImage').src = qrCodeUrl;
+            document.getElementById('qrCode').style.display = 'block'; // Show QR Code section
+
+            // Start a 5-minute timer
+            startPaymentTimer();
+
+            alert('Payment QR Code generated. Please scan to pay.');
+            document.getElementById('paymentForm').style.display = 'none'; // Hide payment form
+        }
+
+        function startPaymentTimer() {
+            let timeLeft = 300; // 5 minutes in seconds
+            const timerDisplay = document.getElementById('timer');
+
+            paymentTimeout = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(paymentTimeout);
+                    alert('Payment time expired. Your order has been canceled.');
+                    document.getElementById('qrCode').style.display = 'none'; // Hide QR Code section
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timerDisplay.innerText = `Time remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        // Simulated payment status check
+        function checkPaymentStatus() {
+            // Simulate checking payment status
+            const paymentStatusDiv = document.getElementById('paymentStatus');
+            const statusMessageElement = document.getElementById('statusMessage');
+
+            // Here, you would normally make an API call to your payment gateway to check payment status
+            // For demonstration, we'll randomly simulate success or failure
+            const isPaymentSuccessful = Math.random() < 0.5; // 50% chance of success
+
+            if (isPaymentSuccessful) {
+                statusMessageElement.textContent = 'Payment successful!';
+            } else {
+                statusMessageElement.textContent = 'Payment failed. Please try again.';
+            }
+
+            paymentStatusDiv.style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>
